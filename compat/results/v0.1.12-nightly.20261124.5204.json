@@ -1,7 +1,7 @@
 {
   "tag": "v0.1.12-nightly.20261124.5204",
   "channel": "nightly",
-  "checked_at": "2026-11-24T20:05:43+00:00",
+  "checked_at": "2026-11-24T20:10:12+00:00",
   "platform": "linux-x64",
   "asset": "t3-0.1.12-nightly.20261124.5204-linux-x64.tar.gz",
   "sha256": "e8a6771d8ede0fe606d069ee4a190d866e1b4a6563105e619d74d210d683353a",
@@ -10,7 +10,7 @@
     "us-east-1.aws.edge.axiom.co"
   ],
   "probe": {
-    "t3": "/tmp/t-off-watchdog-6cz1fvj6/v0.1.12-nightly.20261124.5204/x/t3-0.1.12-nightly.20261124.5204-linux-x64/t3",
+    "t3": "/tmp/t-off-watchdog-oruyo2_d/v0.1.12-nightly.20261124.5204/x/t3-0.1.12-nightly.20261124.5204-linux-x64/t3",
     "fake_identities": {
       "codex_account_id": "acct-FAKE-chatgpt-workspace-0001",
       "openai_user_id": "user-FAKE-openai-0001",
@@ -30,13 +30,13 @@
         ],
         "events": [
           {
-            "uuid": "01a20f2a-2605-7264-948d-b55e3c32bb41",
+            "uuid": "01a20f2e-41b1-716f-927d-ed60482991d7",
             "event": "server.boot.heartbeat",
             "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
             "properties": {
               "threadCount": 0,
               "projectCount": 0,
-              "installId": "a2002451e2f0b32dc5cd7f105bc193c7f63df1442ceda596acb45ef16c976fff",
+              "installId": "160aa607c0e5019cb25da5f4a17c5296c47ef0bc0cbd719ae58afed4f69c0f11",
               "$process_person_profile": false,
               "platform": "linux",
               "arch": "x64",
@@ -48,17 +48,17 @@
               "serverAppVersion": "0.1.12-nightly.20261124.5204",
               "serverMode": "web"
             },
-            "timestamp": "2026-11-24T20:05:50.213Z"
+            "timestamp": "2026-11-24T20:10:19.441Z"
           },
           {
-            "uuid": "01a20f2a-260d-70ca-b22a-540c38c266e0",
+            "uuid": "01a20f2e-41c0-71b1-a9f3-2f2a645a458a",
             "event": "install.owner_observed",
             "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
             "properties": {
               "ownerSource": "openai",
               "ownerId": "13561ea88038893c57652b23be808b8c638c27acd2f31bd3e380919c2d9d153d",
               "observedBy": "server",
-              "installId": "a2002451e2f0b32dc5cd7f105bc193c7f63df1442ceda596acb45ef16c976fff",
+              "installId": "160aa607c0e5019cb25da5f4a17c5296c47ef0bc0cbd719ae58afed4f69c0f11",
               "$process_person_profile": false,
               "platform": "linux",
               "arch": "x64",
@@ -70,17 +70,17 @@
               "serverAppVersion": "0.1.12-nightly.20261124.5204",
               "serverMode": "web"
             },
-            "timestamp": "2026-11-24T20:05:50.221Z"
+            "timestamp": "2026-11-24T20:10:19.456Z"
           },
           {
-            "uuid": "01a20f2a-260d-70ca-b22a-540d68d32754",
+            "uuid": "01a20f2e-41c0-71b1-a9f3-2f2bd88a98b3",
             "event": "install.owner_observed",
             "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
             "properties": {
               "ownerSource": "claude",
               "ownerId": "36fea012bc40fa8f82b83458c5450f4ebcd6b187af920dbbd291e9b24554be9e",
               "observedBy": "server",
-              "installId": "a2002451e2f0b32dc5cd7f105bc193c7f63df1442ceda596acb45ef16c976fff",
+              "installId": "160aa607c0e5019cb25da5f4a17c5296c47ef0bc0cbd719ae58afed4f69c0f11",
               "$process_person_profile": false,
               "platform": "linux",
               "arch": "x64",
@@ -92,7 +92,7 @@
               "serverAppVersion": "0.1.12-nightly.20261124.5204",
               "serverMode": "web"
             },
-            "timestamp": "2026-11-24T20:05:50.221Z"
+            "timestamp": "2026-11-24T20:10:19.456Z"
           }
         ],
         "spans": {
@@ -168,13 +168,13 @@
         ],
         "events": [
           {
-            "uuid": "01a20f2a-deb5-70f0-93b6-e0683fedb793",
+            "uuid": "01a20f2e-fae2-75f1-9545-0f77f3593962",
             "event": "server.boot.heartbeat",
             "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
             "properties": {
               "threadCount": 0,
               "projectCount": 0,
-              "installId": "8cb085517dff9766ee0285dfb746fa69c480a3c1f15fda87a83cb6a4dd1f525f",
+              "installId": "a57e5e9ff9364831b5495ce93a3e7fd95e8e152070eb8fd304dc0beb4142c91a",
               "$process_person_profile": false,
               "platform": "linux",
               "arch": "x64",
@@ -186,17 +186,17 @@
               "serverAppVersion": "0.1.12-nightly.20261124.5204",
               "serverMode": "web"
             },
-            "timestamp": "2026-11-24T20:06:37.493Z"
+            "timestamp": "2026-11-24T20:11:06.850Z"
           },
           {
-            "uuid": "01a20f2a-debe-77d5-8809-455375a411d8",
+            "uuid": "01a20f2e-faeb-73ad-b4d3-e6b856a37951",
             "event": "install.owner_observed",
             "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
             "properties": {
               "ownerSource": "openai",
               "ownerId": "13561ea88038893c57652b23be808b8c638c27acd2f31bd3e380919c2d9d153d",
               "observedBy": "server",
-              "installId": "8cb085517dff9766ee0285dfb746fa69c480a3c1f15fda87a83cb6a4dd1f525f",
+              "installId": "a57e5e9ff9364831b5495ce93a3e7fd95e8e152070eb8fd304dc0beb4142c91a",
               "$process_person_profile": false,
               "platform": "linux",
               "arch": "x64",
@@ -208,17 +208,17 @@
               "serverAppVersion": "0.1.12-nightly.20261124.5204",
               "serverMode": "web"
             },
-            "timestamp": "2026-11-24T20:06:37.502Z"
+            "timestamp": "2026-11-24T20:11:06.859Z"
           },
           {
-            "uuid": "01a20f2a-debe-77d5-8809-4554cc7ab031",
+            "uuid": "01a20f2e-faeb-73ad-b4d3-e6b95f3c560d",
             "event": "install.owner_observed",
             "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
             "properties": {
               "ownerSource": "claude",
               "ownerId": "36fea012bc40fa8f82b83458c5450f4ebcd6b187af920dbbd291e9b24554be9e",
               "observedBy": "server",
-              "installId": "8cb085517dff9766ee0285dfb746fa69c480a3c1f15fda87a83cb6a4dd1f525f",
+              "installId": "a57e5e9ff9364831b5495ce93a3e7fd95e8e152070eb8fd304dc0beb4142c91a",
               "$process_person_profile": false,
               "platform": "linux",
               "arch": "x64",
@@ -230,7 +230,7 @@
               "serverAppVersion": "0.1.12-nightly.20261124.5204",
               "serverMode": "web"
             },
-            "timestamp": "2026-11-24T20:06:37.502Z"
+            "timestamp": "2026-11-24T20:11:06.859Z"
           }
         ],
         "spans": {
@@ -313,9 +313,6 @@
       "server.boot.heartbeat"
     ],
     "identity_sources": [
-      "../auth/ServerSecretStore.ts",
-      "../cloud/config.ts",
-      "../config.ts",
       ".claude.json",
       ".codex",
       "auth.json"
