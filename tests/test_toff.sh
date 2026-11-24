@@ -1,5 +1,7 @@
 #!/bin/sh
 # Tests for toff. Everything runs inside a throwaway HOME; launchctl is never called.
+# Single-quoted `sh -c` scripts and "~" in test names are intended.
+# shellcheck disable=SC2016,SC2088
 set -u
 
 here=$(cd "$(dirname "$0")/.." && pwd)

@@ -44,6 +44,8 @@ die() {
   exit 1
 }
 
+# Display only: show paths under $HOME with a literal "~/".
+# shellcheck disable=SC2088
 tildify() {
   case $1 in
     "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;;
@@ -556,9 +558,11 @@ EOF
     [ "$answer" = tailnet ] || die "nothing changed"
   fi
   json='{"schemaVersion":1,"organization":"'"$POLICY_ORG"'","supportUrl":"'"$TOFF_REPO"'","limits":{"telemetry":false,"connect":false}}'
-  sudo mkdir -p "$(dirname "$POLICY_FILE")" &&
-    printf '%s\n' "$json" | sudo tee "$POLICY_FILE" >/dev/null &&
-    sudo chmod 644 "$POLICY_FILE" || die "could not write $POLICY_FILE"
+  if ! sudo mkdir -p "$(dirname "$POLICY_FILE")" ||
+    ! printf '%s\n' "$json" | sudo tee "$POLICY_FILE" >/dev/null ||
+    ! sudo chmod 644 "$POLICY_FILE"; then
+    die "could not write $POLICY_FILE"
+  fi
   ok "wrote $POLICY_FILE"
   echo "Quit and reopen T3 Code. Settings will show it as managed by \"$POLICY_ORG\"."
 }
