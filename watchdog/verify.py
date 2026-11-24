@@ -185,7 +185,9 @@ def source_checks(src):
     identity_files = {p: s for p, s in server.items() if "telemetry" in p.lower() and re.search(r"identif", p, re.I)}
     identity = set()
     for text in identity_files.values():
-        identity.update(re.findall(r'["\'`](\.[A-Za-z0-9_./-]+|[A-Za-z0-9_./-]+\.(?:json|toml|yaml))["\'`]', text))
+        literals = re.findall(r'["\'`](\.[A-Za-z0-9_./-]+|[A-Za-z0-9_./-]+\.(?:json|toml|yaml))["\'`]', text)
+        # Keep file names the code reads at runtime; drop module import specifiers.
+        identity.update(x for x in literals if not x.startswith(("./", "../")) and not x.endswith((".ts", ".tsx", ".js", ".mjs")))
 
     policy_files = [s for s in everything.values() if re.search(r"ManagedPolicyDocument\s*=", s)]
     policy_text = "\n".join(policy_files)
