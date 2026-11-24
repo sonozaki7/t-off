@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Lint shell scripts
+        if: runner.os == 'Linux'
+        run: shellcheck toff install.sh tests/test_toff.sh
+
+      - name: Compile Python
+        run: python3 -m py_compile lab/probe.py watchdog/verify.py
+
+      - name: Test toff (inside a throwaway HOME)
+        run: sh tests/test_toff.sh
+
+      - name: Test the installer
+        run: |
+          TOFF_BASE_URL="file://$PWD" TOFF_NO_APPLY=1 \
+            XDG_DATA_HOME="$RUNNER_TEMP/data" TOFF_BIN_DIR="$RUNNER_TEMP/bin" sh install.sh
+          "$RUNNER_TEMP/bin/toff" version
+          test -f "$RUNNER_TEMP/data/t-off/lab/probe.py"

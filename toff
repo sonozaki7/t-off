@@ -1,0 +1,722 @@
+#!/bin/sh
+# t-off: telemetry off for T3 Code, re-verified against every upstream release.
+# https://github.com/sonozaki7/t-off  (MIT)
+# Unofficial; not affiliated with T3 Tools. It only sets the opt-out T3 Code itself supports.
+set -u
+
+TOFF_VERSION="1.0.0"
+TOFF_REPO="https://github.com/sonozaki7/t-off"
+VAR="T3CODE_TELEMETRY_ENABLED"
+BEGIN_MARK="# >>> t-off >>>"
+END_MARK="# <<< t-off <<<"
+
+T3_HOME="${T3CODE_HOME:-$HOME/.t3}"
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+STATE_DIR="$CONFIG_HOME/t-off"
+STATE_FILE="$STATE_DIR/state"
+OS="$(uname -s 2>/dev/null || echo unknown)"
+LAUNCH_AGENT="$HOME/Library/LaunchAgents/io.github.t-off.env.plist"
+ENV_D_FILE="$CONFIG_HOME/environment.d/60-t-off.conf"
+FISH_FILE="$CONFIG_HOME/fish/conf.d/t-off.fish"
+SERVICE_ENV="$T3_HOME/service.env"
+AXIOM_HOST="us-east-1.aws.edge.axiom.co"
+POLICY_ORG="t-off (local policy)"
+if [ "$OS" = Darwin ]; then
+  POLICY_FILE="/Library/Application Support/T3Code/policy.json"
+  PROFILE_POLICY="/Library/Managed Preferences/com.t3tools.t3code.plist"
+else
+  POLICY_FILE="/etc/t3code/policy.json"
+  PROFILE_POLICY=""
+fi
+
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+  B=$(printf '\033[1m') G=$(printf '\033[32m') Y=$(printf '\033[33m') R=$(printf '\033[31m') D=$(printf '\033[2m') N=$(printf '\033[0m')
+else
+  B='' G='' Y='' R='' D='' N=''
+fi
+ok() { printf '  %s[ok]%s %s\n' "$G" "$N" "$*"; }
+warn() { printf '  %s[!!]%s %s\n' "$Y" "$N" "$*"; }
+bad() { printf '  %s[xx]%s %s\n' "$R" "$N" "$*"; }
+info() { printf '  %s[--]%s %s\n' "$D" "$N" "$*"; }
+die() {
+  printf '%stoff:%s %s\n' "$R" "$N" "$*" >&2
+  exit 1
+}
+
+tildify() {
+  case $1 in
+    "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
+fmt_time() { # epoch seconds -> local time
+  [ -n "${1:-}" ] || {
+    printf 'unknown'
+    return
+  }
+  date -r "$1" '+%Y-%m-%d %H:%M' 2>/dev/null || date -d "@$1" '+%Y-%m-%d %H:%M' 2>/dev/null || printf '%s' "$1"
+}
+
+script_dir() {
+  p=$0
+  while [ -h "$p" ]; do
+    l=$(readlink "$p")
+    case $l in
+      /*) p=$l ;;
+      *) p=$(dirname "$p")/$l ;;
+    esac
+  done
+  (cd "$(dirname "$p")" 2>/dev/null && pwd -P)
+}
+
+shell_is() {
+  case "${SHELL:-}" in
+    */"$1") return 0 ;;
+  esac
+  return 1
+}
+
+# ---------------------------------------------------------------- state
+write_state() {
+  mkdir -p "$STATE_DIR"
+  printf 'mode=%s\nsince=%s\nversion=%s\n' "$1" "$(date +%s)" "$TOFF_VERSION" >"$STATE_FILE"
+}
+state_get() { sed -n "s/^$1=//p" "$STATE_FILE" 2>/dev/null | head -n 1; }
+
+# ---------------------------------------------------------------- managed blocks
+has_block() { [ -f "$1" ] && grep -q "^$BEGIN_MARK" "$1" 2>/dev/null; }
+
+strip_block() { # remove our block; rewrite in place so symlinked dotfiles stay symlinks
+  has_block "$1" || return 0
+  tmp=$(mktemp "${TMPDIR:-/tmp}/toff.XXXXXX") || die "mktemp failed"
+  awk -v b="$BEGIN_MARK" -v e="$END_MARK" \
+    'index($0, b) == 1 { skip = 1; next } skip && index($0, e) == 1 { skip = 0; next } !skip { print }' \
+    "$1" >"$tmp" && cat "$tmp" >"$1"
+  rm -f "$tmp"
+}
+
+add_block() { # file content
+  strip_block "$1"
+  mkdir -p "$(dirname "$1")"
+  if [ -s "$1" ] && [ -n "$(tail -c 1 "$1")" ]; then printf '\n' >>"$1"; fi
+  printf '%s managed by t-off, undo with: toff optin\n%s\n%s\n' "$BEGIN_MARK" "$2" "$END_MARK" >>"$1"
+}
+
+rc_targets() { # shell startup files that the desktop app's "$SHELL -ilc" probe reads
+  if command -v zsh >/dev/null 2>&1 || shell_is zsh; then echo "${ZDOTDIR:-$HOME}/.zshenv"; fi
+  if shell_is bash || [ -f "$HOME/.bash_profile" ] || [ -f "$HOME/.bashrc" ]; then
+    if [ -f "$HOME/.bash_profile" ]; then
+      echo "$HOME/.bash_profile"
+    elif [ -f "$HOME/.bash_login" ]; then
+      echo "$HOME/.bash_login"
+    else
+      echo "$HOME/.profile"
+    fi
+    if [ -f "$HOME/.bashrc" ]; then echo "$HOME/.bashrc"; fi
+  fi
+  if shell_is sh || shell_is dash || shell_is ksh || shell_is mksh; then echo "$HOME/.profile"; fi
+}
+
+block_files() { # every file t-off may have put a block in
+  printf '%s\n' "${ZDOTDIR:-$HOME}/.zshenv" "$HOME/.bash_profile" "$HOME/.bash_login" "$HOME/.profile" "$HOME/.bashrc" "$SERVICE_ENV"
+}
+
+fish_wanted() { command -v fish >/dev/null 2>&1 || shell_is fish; }
+
+write_launch_agent() {
+  mkdir -p "$(dirname "$LAUNCH_AGENT")"
+  cat >"$LAUNCH_AGENT" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Managed by t-off ($TOFF_REPO). Undo with: toff optin -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>io.github.t-off.env</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/launchctl</string>
+    <string>setenv</string>
+    <string>$VAR</string>
+    <string>false</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+</dict>
+</plist>
+EOF
+}
+
+apply_optout() {
+  rc_targets | awk '!seen[$0]++' | while IFS= read -r f; do
+    add_block "$f" "export $VAR=false"
+    ok "$(tildify "$f")  export $VAR=false"
+  done
+  if fish_wanted; then
+    mkdir -p "$(dirname "$FISH_FILE")"
+    printf '# managed by t-off, undo with: toff optin\nset -gx %s false\n' "$VAR" >"$FISH_FILE"
+    ok "$(tildify "$FISH_FILE")  set -gx $VAR false"
+  fi
+  mkdir -p "$T3_HOME"
+  add_block "$SERVICE_ENV" "$VAR=false"
+  ok "$(tildify "$SERVICE_ENV")  $VAR=false  (t3 background service)"
+  if [ "$OS" = Darwin ]; then
+    write_launch_agent
+    ok "$(tildify "$LAUNCH_AGENT")  (apps opened from Finder or the Dock, after login)"
+    if [ -z "${TOFF_NO_LAUNCHCTL:-}" ]; then
+      if launchctl setenv "$VAR" false 2>/dev/null; then ok "launchctl setenv $VAR false  (apps launched from now on)"; else warn "launchctl setenv failed; the login shell setting still applies"; fi
+    fi
+  elif [ "$OS" = Linux ]; then
+    mkdir -p "$(dirname "$ENV_D_FILE")"
+    printf '# managed by t-off, undo with: toff optin\n%s=false\n' "$VAR" >"$ENV_D_FILE"
+    ok "$(tildify "$ENV_D_FILE")  (desktop sessions, from next login)"
+  fi
+}
+
+remove_optout() {
+  block_files | while IFS= read -r f; do
+    if has_block "$f"; then
+      strip_block "$f"
+      ok "removed the t-off block from $(tildify "$f")"
+    fi
+  done
+  if [ -f "$SERVICE_ENV" ] && [ ! -s "$SERVICE_ENV" ]; then rm -f "$SERVICE_ENV"; fi
+  for f in "$FISH_FILE" "$ENV_D_FILE" "$LAUNCH_AGENT"; do
+    if [ -f "$f" ]; then
+      rm -f "$f"
+      ok "removed $(tildify "$f")"
+    fi
+  done
+  if [ "$OS" = Darwin ] && [ -z "${TOFF_NO_LAUNCHCTL:-}" ]; then
+    launchctl unsetenv "$VAR" 2>/dev/null && ok "launchctl unsetenv $VAR"
+  fi
+  return 0
+}
+
+# ---------------------------------------------------------------- checks
+run_timeout() { # seconds cmd... ; stdout of cmd, killed after N seconds
+  secs=$1
+  shift
+  "$@" &
+  pid=$!
+  (
+    sleep "$secs"
+    kill -TERM "$pid" 2>/dev/null
+  ) >/dev/null 2>&1 &
+  killer=$!
+  wait "$pid" 2>/dev/null
+  rc=$?
+  kill "$killer" 2>/dev/null
+  return $rc
+}
+
+login_shell_value() { # what "$SHELL -ilc" (the desktop app's probe) sees, or <unset>
+  [ -n "${SHELL:-}" ] && [ -x "${SHELL:-}" ] || return 1
+  out=$(run_timeout 8 "$SHELL" -ilc env </dev/null 2>/dev/null) || true
+  v=$(printf '%s\n' "$out" | sed -n "s/^$VAR=//p" | tail -n 1)
+  if [ -n "$v" ]; then printf '%s' "$v"; else printf '<unset>'; fi
+}
+
+t3_server_pids() { # desktop-bundled servers and standalone t3 servers
+  ps -axo pid=,command= 2>/dev/null | awk '
+    /apps\/server\/dist\/bin\.mjs/ || /\/runtime\/versions\/[^ ]*\/t3 / || /(^|\/)t3 (serve|start)( |$)/ {
+      if ($0 !~ /awk|toff|probe\.py/) print $1
+    }'
+}
+
+proc_env_has() { # pid -> 0 if started with VAR=false
+  if [ -r "/proc/$1/environ" ]; then
+    tr '\0' '\n' <"/proc/$1/environ" | grep -qx "$VAR=false"
+  else
+    ps eww -o command= -p "$1" 2>/dev/null | tr ' ' '\n' | grep -qx "$VAR=false"
+  fi
+}
+
+proc_start_epoch() {
+  s=$(ps -o lstart= -p "$1" 2>/dev/null | sed 's/^ *//')
+  [ -n "$s" ] || return 1
+  date -j -f '%a %b %d %T %Y' "$s" +%s 2>/dev/null || date -d "$s" +%s 2>/dev/null
+}
+
+check_running() {
+  since=$(state_get since)
+  pids=$(t3_server_pids)
+  if [ -z "$pids" ]; then
+    info "no T3 Code server is running"
+    return
+  fi
+  for pid in $pids; do
+    started=$(proc_start_epoch "$pid" || echo 0)
+    if proc_env_has "$pid"; then
+      ok "server pid $pid (started $(fmt_time "$started")) runs with $VAR=false"
+    elif [ "$(state_get mode)" = optout ] && [ -n "$since" ] && [ "${started:-0}" -lt "$since" ]; then
+      warn "server pid $pid started $(fmt_time "$started"), before you opted out: quit and reopen T3 Code"
+    elif [ "$(state_get mode)" = optout ]; then
+      info "server pid $pid (desktop) gets the setting from your login shell after launch"
+    else
+      warn "server pid $pid runs with T3 Code's default: telemetry on"
+    fi
+  done
+}
+
+upload_lines() { # "epoch outcome" for each upload attempt to ingest.t3.codes in T3's own trace logs
+  for f in "$T3_HOME"/userdata/logs/server.trace.ndjson*; do
+    [ -f "$f" ] && grep -h '"server.address":"ingest.t3.codes"' "$f" 2>/dev/null
+  done | sed -n 's/.*"startTimeUnixNano":"\([0-9]*\)[0-9]\{9\}".*"exit":{"_tag":"\([A-Za-z]*\)".*/\1 \2/p' | sort -n
+}
+
+resolve_ips() {
+  if command -v getent >/dev/null 2>&1; then
+    getent ahosts "$1" 2>/dev/null | awk '{ print $1 }' | sort -u
+  elif command -v dscacheutil >/dev/null 2>&1; then
+    dscacheutil -q host -a name "$1" 2>/dev/null | awk '/_address:/ { print $2 }' | sort -u
+  fi
+}
+
+t3_all_pids() { # every T3 Code process: app, helpers, renderer, network service, servers
+  { pgrep -f 'T3 Code' 2>/dev/null; t3_server_pids; } | sort -u
+}
+
+axiom_connections() { # live TCP connections from T3 Code processes to the Axiom trace endpoint
+  ips=$(resolve_ips "$AXIOM_HOST")
+  [ -n "$ips" ] || return 2
+  pids=$(t3_all_pids)
+  [ -n "$pids" ] || {
+    echo 0
+    return 0
+  }
+  if command -v lsof >/dev/null 2>&1; then
+    conns=$(lsof -nP -a -p "$(echo "$pids" | paste -sd, -)" -iTCP -sTCP:ESTABLISHED 2>/dev/null || true)
+  elif command -v ss >/dev/null 2>&1; then
+    conns=$(ss -tnp 2>/dev/null | grep -E "pid=($(echo "$pids" | paste -sd'|' -))," || true)
+  else
+    return 2
+  fi
+  n=0
+  for ip in $ips; do
+    case $ip in
+      *:*) pat=$ip ;;
+      *)
+        nat64=$(echo "$ip" | awk -F. '{ printf "::%x:%x]", $1 * 256 + $2, $3 * 256 + $4 }')
+        pat="$ip|$nat64"
+        ;;
+    esac
+    c=$(printf '%s\n' "$conns" | grep -c -E "$(printf '%s' "$pat" | sed 's/\./\\./g; s/\]/\\]/g')" || true)
+    n=$((n + c))
+  done
+  echo "$n"
+}
+
+policy_state() {
+  if [ -n "$PROFILE_POLICY" ] && [ -f "$PROFILE_POLICY" ]; then
+    echo profile
+  elif [ -f "$POLICY_FILE" ] && grep -q "$POLICY_ORG" "$POLICY_FILE" 2>/dev/null; then
+    echo tailnet
+  elif [ -f "$POLICY_FILE" ]; then
+    echo other
+  else
+    echo none
+  fi
+}
+
+# ---------------------------------------------------------------- commands
+cmd_optout() {
+  echo "${B}t-off${N}: turning T3 Code telemetry off"
+  apply_optout
+  write_state optout
+  echo
+  echo "Done. ${B}Quit and reopen T3 Code${N} (and run 't3 service restart' if you use the background service)."
+  echo "Then check with: toff status"
+}
+
+print_risks() {
+  cat <<EOF
+${B}What T3 Code uploads when telemetry is on${N} (to ingest.t3.codes, which keeps a copy and forwards to PostHog)
+  - an analytics ID made from your accounts: SHA-256 of your ChatGPT workspace id (~/.codex/auth.json)
+    or Claude user id (~/.claude.json), plus SHA-256 of your OpenAI user id, Claude account UUID and
+    T3 Connect account, so T3 can tell which machines belong to the same person
+  - for every agent turn and request: provider, model, reasoning effort, permission mode, duration and
+    token counts (from 0.1.12 on, every model id, including custom and self-hosted model names)
+  - thread and project counts, about 30 feature-usage events, OS, CPU architecture and app version
+  - relay connection traces to Axiom (connection timings, machine name, error text) when you use T3 Connect
+  It does not upload prompts, responses, file contents or credentials.
+
+${B}Risks you accept${N}
+  - The hashes are unsalted. Anyone who knows one of your account ids (your AI provider, T3 for your
+    T3 Connect account, or anyone those ids leak to) can compute the same hash and link the data to you.
+  - Data already sent stays with T3 Tools and PostHog. To see or delete it, email privacy@t3.tools.
+  - T3 Code ignores DO_NOT_TRACK, so opting back out later needs t-off (or $VAR=false) again.
+EOF
+}
+
+cmd_optin() {
+  yes=""
+  for a in "$@"; do
+    case $a in --yes-i-understand) yes=1 ;; esac
+  done
+  echo "${B}Opting back in to T3 Code's telemetry${N}"
+  echo
+  print_risks
+  echo
+  if [ -z "$yes" ]; then
+    [ -t 0 ] || die "refusing to opt in without a terminal; pass --yes-i-understand"
+    printf 'Type "I understand" to opt in: '
+    read -r answer || answer=""
+    [ "$answer" = "I understand" ] || die "not opting in; nothing changed"
+  fi
+  remove_optout
+  write_state optin
+  echo
+  echo "Opted in. Quit and reopen T3 Code to apply. 'toff optout' turns it off again."
+}
+
+cmd_status() {
+  echo "${B}t-off $TOFF_VERSION${N}: telemetry off for T3 Code"
+  mode=$(state_get mode)
+  since=$(state_get since)
+  case $mode in
+    optout) echo "Mode: ${G}telemetry off${N} since $(fmt_time "$since")" ;;
+    optin) echo "Mode: ${Y}opted in${N} to T3 Code's telemetry since $(fmt_time "$since")" ;;
+    *) echo "Mode: ${Y}not set up${N}. T3 Code's default is telemetry ON. Run: toff optout" ;;
+  esac
+
+  echo
+  echo "${B}Configuration${N}"
+  found=0
+  cfg=$(block_files | while IFS= read -r x; do if has_block "$x"; then ok "$(tildify "$x")"; fi; done)
+  if [ -n "$cfg" ]; then
+    printf '%s\n' "$cfg"
+    found=1
+  fi
+  if [ -f "$FISH_FILE" ]; then ok "$(tildify "$FISH_FILE")" && found=1; fi
+  if [ -f "$ENV_D_FILE" ]; then ok "$(tildify "$ENV_D_FILE")" && found=1; fi
+  if [ "$OS" = Darwin ]; then
+    if [ -f "$LAUNCH_AGENT" ]; then ok "$(tildify "$LAUNCH_AGENT")" && found=1; fi
+    lv=$(launchctl getenv "$VAR" 2>/dev/null || true)
+    if [ "$lv" = false ]; then ok "launchd: $VAR=false"; elif [ "$mode" = optout ]; then warn "launchd: $VAR is not set (log out and in, or run toff optout again)"; fi
+  fi
+  [ "$found" = 1 ] || info "no t-off settings found"
+  eff=$(login_shell_value || echo '<no login shell>')
+  case $eff in
+    false) ok "login shell (${SHELL##*/} -ilc, what the desktop app reads): $VAR=false" ;;
+    '<unset>') if [ "$mode" = optout ]; then warn "login shell (${SHELL##*/} -ilc) does not export $VAR"; else info "login shell does not set $VAR (T3 Code default: on)"; fi ;;
+    '<no login shell>') info "could not run your login shell to double-check" ;;
+    *) bad "login shell exports $VAR=$eff" ;;
+  esac
+  case $(policy_state) in
+    tailnet) ok "managed policy: telemetry and T3 Connect off ($POLICY_FILE)" ;;
+    profile) info "an MDM configuration profile manages T3 Code ($PROFILE_POLICY)" ;;
+    other) info "a managed policy written by someone else exists ($POLICY_FILE)" ;;
+  esac
+
+  echo
+  echo "${B}Running T3 Code${N}"
+  check_running
+  ax=$(axiom_connections || echo skip)
+  case $ax in
+    skip | '') ;;
+    0) ok "no open connection from T3 Code to $AXIOM_HOST (relay traces)" ;;
+    *) warn "$ax open connection(s) from T3 Code to $AXIOM_HOST (relay traces): restart T3 Code if you just opted out" ;;
+  esac
+
+  echo
+  echo "${B}Uploads in T3 Code's own logs${N}  ($(tildify "$T3_HOME")/userdata/logs, which keep about a day)"
+  audit_report "$since"
+}
+
+audit_report() {
+  since=${1:-}
+  lines=$(upload_lines)
+  if [ -z "$lines" ]; then
+    ok "no upload attempts to ingest.t3.codes in the retained logs"
+    return 0
+  fi
+  total=$(printf '%s\n' "$lines" | grep -c .)
+  sent=$(printf '%s\n' "$lines" | grep -c ' Success$' || true)
+  first=$(printf '%s\n' "$lines" | head -n 1 | cut -d' ' -f1)
+  last=$(printf '%s\n' "$lines" | tail -n 1 | cut -d' ' -f1)
+  info "$total upload attempt(s) to ingest.t3.codes between $(fmt_time "$first") and $(fmt_time "$last") ($sent delivered, the rest retried)"
+  if [ "$(state_get mode)" = optout ] && [ -n "$since" ]; then
+    after=$(printf '%s\n' "$lines" | awk -v s="$since" '$1 >= s' | grep -c . || true)
+    if [ "$after" -eq 0 ]; then
+      ok "none since you opted out ($(fmt_time "$since"))"
+    else
+      bad "$after upload attempt(s) since you opted out: quit and reopen T3 Code, then run toff status again"
+      return 1
+    fi
+  fi
+}
+
+cmd_audit() {
+  echo "${B}T3 Code telemetry uploads recorded on this machine${N}"
+  audit_report "$(state_get since)"
+  rc=$?
+  lines=$(upload_lines)
+  if [ -n "$lines" ]; then
+    echo
+    echo "Upload attempts per hour:"
+    printf '%s\n' "$lines" | while read -r t outcome; do printf '%s %s\n' "$(fmt_time "$t" | cut -c1-13)" "$outcome"; done |
+      awk '{ k = $1 " " $2 ":00"; n[k]++; if ($3 == "Success") s[k]++ } END { for (k in n) printf "  %s  %3d attempts, %3d delivered\n", k, n[k], s[k] }' | sort
+  fi
+  return $rc
+}
+
+find_t3() {
+  if [ -n "${TOFF_T3:-}" ]; then
+    echo "$TOFF_T3"
+    return 0
+  fi
+  if [ -x "$T3_HOME/bin/t3" ]; then
+    echo "$T3_HOME/bin/t3"
+    return 0
+  fi
+  if [ "$OS" = Darwin ]; then
+    for app in "/Applications/T3 Code.app" "/Applications/T3 Code (Beta).app" "/Applications/T3 Code (Nightly).app" \
+      "$HOME/Applications/T3 Code.app" "$HOME/Applications/T3 Code (Beta).app"; do
+      if [ -d "$app" ]; then
+        echo "$app"
+        return 0
+      fi
+    done
+  fi
+  command -v t3 2>/dev/null
+}
+
+cmd_inspect() {
+  py=$(command -v python3) || die "toff inspect needs python3"
+  dir=$(script_dir)
+  probe="$dir/lab/probe.py"
+  [ -f "$probe" ] || probe="$DATA_HOME/t-off/lab/probe.py"
+  [ -f "$probe" ] || die "lab/probe.py not found (reinstall t-off)"
+  t3=""
+  while [ $# -gt 0 ]; do
+    case $1 in
+      --t3) t3=${2:-} && shift ;;
+      --t3=*) t3=${1#--t3=} ;;
+    esac
+    shift
+  done
+  [ -n "$t3" ] || t3=$(find_t3) || true
+  [ -n "$t3" ] || die "could not find T3 Code; pass --t3 /path/to/t3 or the .app"
+  echo "Running your installed T3 Code server ($t3) in a throwaway sandbox with fake Codex and Claude"
+  echo "logins. Its telemetry is pointed at a local endpoint on 127.0.0.1, so nothing is uploaded."
+  echo "This takes about two minutes."
+  echo
+  "$py" -I "$probe" --t3 "$t3"
+}
+
+cmd_tailnet() {
+  sub=${1:-status}
+  [ $# -gt 0 ] && shift
+  case $sub in
+    on) tailnet_on "$@" ;;
+    off) tailnet_off ;;
+    status)
+      case $(policy_state) in
+        tailnet) echo "Tailscale-only mode is on ($POLICY_FILE)." ;;
+        *) echo "Tailscale-only mode is off. Turn it on with: toff tailnet on" ;;
+      esac
+      ;;
+    *) die "usage: toff tailnet on|off|status" ;;
+  esac
+}
+
+tailnet_on() {
+  yes=""
+  for a in "$@"; do
+    case $a in --yes) yes=1 ;; esac
+  done
+  command -v tailscale >/dev/null 2>&1 || die "Tailscale is not installed. Get it from https://tailscale.com/download, then run this again."
+  tailscale status >/dev/null 2>&1 || die "Tailscale is installed but not connected. Run 'tailscale up' first."
+  case $(policy_state) in
+    profile) die "an MDM configuration profile already manages T3 Code ($PROFILE_POLICY); t-off will not add a second policy" ;;
+    other) die "$POLICY_FILE exists and was not written by t-off; leaving it alone" ;;
+  esac
+  cat <<EOF
+${B}Tailscale-only mode${N}
+
+This writes a T3 Code managed policy ($POLICY_FILE, needs sudo) that
+  - turns T3 Connect off and unlinks this machine from it, so remote access goes only over your tailnet
+    (WireGuard, encrypted end to end between your own devices) instead of T3's relay and Cloudflare tunnel
+  - turns product analytics and relay tracing off at the policy level, on top of the environment setting
+
+What stops working: phone access through T3 Connect, push notifications and Live Activities, guest links
+and webhook tasks that rely on the relay. To use T3 Code remotely afterwards, turn on Tailscale HTTPS in
+T3 Code (Settings, Sharing & access) or run 't3 serve --tailscale-serve', and pair with 't3 pair --tailscale'.
+Want push notifications? Skip this and use T3 Connect's 'Notifications only' mode instead (see: toff mobile).
+Undo any time with: toff tailnet off
+
+EOF
+  if [ -z "$yes" ]; then
+    [ -t 0 ] || die "refusing without a terminal; pass --yes"
+    printf 'Type "tailnet" to continue: '
+    read -r answer || answer=""
+    [ "$answer" = tailnet ] || die "nothing changed"
+  fi
+  json='{"schemaVersion":1,"organization":"'"$POLICY_ORG"'","supportUrl":"'"$TOFF_REPO"'","limits":{"telemetry":false,"connect":false}}'
+  sudo mkdir -p "$(dirname "$POLICY_FILE")" &&
+    printf '%s\n' "$json" | sudo tee "$POLICY_FILE" >/dev/null &&
+    sudo chmod 644 "$POLICY_FILE" || die "could not write $POLICY_FILE"
+  ok "wrote $POLICY_FILE"
+  echo "Quit and reopen T3 Code. Settings will show it as managed by \"$POLICY_ORG\"."
+}
+
+tailnet_off() {
+  case $(policy_state) in
+    tailnet)
+      sudo rm -f "$POLICY_FILE" || die "could not remove $POLICY_FILE"
+      ok "removed $POLICY_FILE; quit and reopen T3 Code, then relink T3 Connect if you want it back"
+      ;;
+    none) echo "Tailscale-only mode is not on." ;;
+    *) die "the policy at $POLICY_FILE was not written by t-off; leaving it alone" ;;
+  esac
+}
+
+t3_port() {
+  p=$(sed -n 's/.*"port":[[:space:]]*\([0-9][0-9]*\).*/\1/p' "$T3_HOME/userdata/server-runtime.json" 2>/dev/null | head -n 1)
+  echo "${p:-3773}"
+}
+
+connect_mode() { # off | notifications-only | on | unknown, from T3 Code's own state on this machine
+  secrets="$T3_HOME/userdata/secrets"
+  [ -d "$secrets" ] || {
+    echo unknown
+    return
+  }
+  [ -f "$secrets/cloud-linked-user-id.bin" ] || {
+    echo off
+    return
+  }
+  if pgrep -f "$T3_HOME/tools/cloudflared" >/dev/null 2>&1 || pgrep -f 'cloudflared tunnel .*run' >/dev/null 2>&1; then
+    echo on
+  elif [ "$(cat "$secrets/cloud-publish-agent-activity.bin" 2>/dev/null)" = true ]; then
+    echo notifications-only
+  else
+    echo unknown
+  fi
+}
+
+cmd_mobile() {
+  echo "${B}Using the T3 Code mobile app without sending your sessions through T3's servers${N}"
+  echo
+  echo "Sessions (chats, code, terminal output, secrets) go over Tailscale, which is encrypted end to end"
+  echo "between your own devices. Push notifications are optional: T3 Connect's 'Notifications only'"
+  echo "mode keeps them working without a tunnel, so other devices cannot connect through T3's relay."
+  echo
+  echo "${B}This machine${N}"
+  if [ "$(state_get mode)" = optout ]; then ok "telemetry off (t-off)"; else warn "telemetry is on: run toff optout"; fi
+  ts_ok=0
+  if ! command -v tailscale >/dev/null 2>&1; then
+    bad "Tailscale is not installed (https://tailscale.com/download)"
+  elif ! js=$(tailscale status --json 2>/dev/null); then
+    bad "Tailscale is installed but not connected: run 'tailscale up'"
+  else
+    ok "Tailscale is connected"
+    ts_ok=1
+    if printf '%s' "$js" | grep -q '"MagicDNSEnabled":[[:space:]]*true'; then ok "MagicDNS is on"; else
+      bad "MagicDNS is off: turn it on in the Tailscale admin console (DNS page)"
+      ts_ok=0
+    fi
+    if printf '%s' "$js" | grep -q '"CertDomains":[[:space:]]*\['; then ok "HTTPS certificates are on"; else
+      bad "HTTPS certificates are off: enable them in the Tailscale admin console (DNS page)"
+      ts_ok=0
+    fi
+    phones=$(printf '%s' "$js" | grep -c -E '"OS":[[:space:]]*"(iOS|android)"' || true)
+    if [ "${phones:-0}" -gt 0 ]; then ok "$phones phone(s) on your tailnet"; else warn "no phone on your tailnet yet: install Tailscale on it and sign in"; fi
+    port=$(t3_port)
+    if tailscale serve status 2>/dev/null | grep -q "127.0.0.1:$port"; then ok "T3 Code is served over Tailscale HTTPS (port $port)"; else warn "T3 Code is not served over Tailscale HTTPS yet (step 1)"; fi
+  fi
+  case $(connect_mode) in
+    on) warn "T3 Connect is fully on: its managed tunnel can carry sessions through T3's relay (step 2)" ;;
+    notifications-only) ok "T3 Connect is in 'Notifications only' mode (no tunnel)" ;;
+    off) ok "T3 Connect is off (no push notifications)" ;;
+    *) info "could not tell T3 Connect's mode (is T3 Code running?)" ;;
+  esac
+  [ "$(policy_state)" = tailnet ] && ok "Tailscale-only policy is on (T3 Connect is locked off)"
+  cat <<EOF
+
+${B}Setup${N}
+  1. On this machine, in T3 Code: Settings > Sharing & access > turn on ${B}Tailscale HTTPS${N}.
+     (Command-line host: t3 serve --tailscale-serve, or t3 pair --tailscale for a running server.)
+  2. Same page, T3 Connect: choose ${B}Notifications only${N} if you want push notifications and Live
+     Activities, or ${B}Off${N} if you don't. For a hard guarantee use: toff tailnet on  (locks Connect off).
+  3. On your phone: install Tailscale, sign in to the same tailnet and turn on VPN On Demand so it is
+     always connected. In the T3 Code app add the machine with the pairing QR from step 1
+     (or 't3 pair --tailscale'), and make the Tailscale route the first one.
+  4. In the mobile app: Settings > About T3 Code > Diagnostics > turn off ${B}Send crash reports${N}.
+  5. In a browser, open your machine's Tailscale HTTPS address instead of app.t3.codes, so the web app
+     is served by your own machine.
+
+${B}What still reaches T3${N} with 'Notifications only': thread and project titles, model names and run
+status for the notifications, your T3 Connect sign-in, and the mobile app's relay connection traces
+(no toggle upstream). With Connect off: nothing. Without a tunnel the app cannot fall back to T3's relay,
+so if Tailscale is off on the phone it simply cannot connect.
+EOF
+  [ "$ts_ok" = 1 ] || return 1
+}
+
+cmd_uninstall() {
+  yes=""
+  for a in "$@"; do
+    case $a in --yes) yes=1 ;; esac
+  done
+  if [ -z "$yes" ]; then
+    [ -t 0 ] || die "pass --yes to uninstall without a terminal"
+    printf 'This removes t-off and T3 Code goes back to its default (telemetry ON). Continue? [y/N] '
+    read -r answer || answer=""
+    case $answer in y | Y | yes) ;; *) die "nothing changed" ;; esac
+  fi
+  remove_optout
+  [ "$(policy_state)" = tailnet ] && warn "Tailscale-only policy left in place; remove it with: toff tailnet off"
+  rm -rf "$STATE_DIR"
+  if [ -d "$DATA_HOME/t-off" ]; then
+    rm -rf "$DATA_HOME/t-off"
+    ok "removed $(tildify "$DATA_HOME/t-off")"
+  fi
+  for link in "$HOME/.local/bin/toff" "${TOFF_BIN_DIR:-$HOME/.local/bin}/toff"; do
+    if [ -h "$link" ]; then rm -f "$link" && ok "removed $(tildify "$link")"; fi
+  done
+  echo "t-off is uninstalled. Quit and reopen T3 Code to apply."
+}
+
+cmd_help() {
+  cat <<EOF
+${B}toff${N} $TOFF_VERSION: telemetry off for T3 Code  ($TOFF_REPO)
+
+  toff optout             Turn T3 Code's telemetry off (the installer runs this)
+  toff status             Show settings, running servers, live connections and recent uploads
+  toff audit              List telemetry uploads recorded in T3 Code's own logs
+  toff inspect            Run your T3 Code in a sandbox and show exactly what it would send
+  toff optin              Turn T3 Code's telemetry back on, after reading the risks
+  toff mobile             Check and set up the mobile app over Tailscale instead of T3's relay
+  toff tailnet on|off     Optional: lock T3 Connect off with a managed policy (needs sudo)
+  toff uninstall          Remove t-off and everything it changed
+
+t-off sets $VAR=false, T3 Code's own documented switch, in the places T3 Code reads it:
+your login shell (the desktop app runs "\$SHELL -ilc"), ~/.t3/service.env for the background
+service, and launchd (macOS) or environment.d (Linux). It never modifies T3 Code itself.
+Unofficial; not affiliated with T3 Tools.
+EOF
+}
+
+main() {
+  cmd=${1:-status}
+  [ $# -gt 0 ] && shift
+  case $cmd in
+    optout) cmd_optout ;;
+    optin) cmd_optin "$@" ;;
+    status) cmd_status ;;
+    audit) cmd_audit ;;
+    inspect) cmd_inspect "$@" ;;
+    mobile) cmd_mobile ;;
+    tailnet) cmd_tailnet "$@" ;;
+    uninstall) cmd_uninstall "$@" ;;
+    version | --version | -v) echo "toff $TOFF_VERSION" ;;
+    help | --help | -h) cmd_help ;;
+    *) die "unknown command '$cmd' (see: toff help)" ;;
+  esac
+}
+
+main "$@"

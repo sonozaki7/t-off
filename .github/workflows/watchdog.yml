@@ -1,0 +1,76 @@
+name: watchdog
+
+# Re-verifies the opt-out against every new upstream T3 Code release, with no human involved.
+# Commits results to compat/ and COMPATIBILITY.md, opens an issue when something needs a human,
+# and fails the run (which emails the repository owner) if the opt-out is broken.
+on:
+  schedule:
+    - cron: "23 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: "Upstream tags to verify, comma-separated (default: latest stable and nightly)"
+        required: false
+        default: ""
+      force:
+        description: "Re-verify tags that were already verified"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: watchdog
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Verify the newest upstream releases
+        id: verify
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAGS: ${{ inputs.tags }}
+          FORCE: ${{ inputs.force && '--force' || '' }}
+        run: python3 -I watchdog/verify.py --repo-root "$PWD" --policy-test --tags "${TAGS:-}" $FORCE
+
+      - name: Commit results
+        if: always()
+        env:
+          TAGS: ${{ steps.verify.outputs.tags }}
+        run: |
+          git config user.name "t-off watchdog"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add compat COMPATIBILITY.md
+          if git diff --cached --quiet; then
+            echo "Nothing new to record."
+            exit 0
+          fi
+          git commit -m "watchdog: verify ${TAGS:-upstream releases}"
+          git pull --rebase --quiet origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Open an issue when something needs a human
+        if: steps.verify.outputs.alert == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ steps.verify.outputs.alert_title }}
+        run: |
+          if gh issue list --state open --limit 200 --json title --jq '.[].title' | grep -Fxq "$TITLE"; then
+            echo "An open issue already tracks: $TITLE"
+          else
+            gh issue create --title "$TITLE" --body-file watchdog-alert.md --label watchdog ||
+              gh issue create --title "$TITLE" --body-file watchdog-alert.md
+          fi
+
+      - name: Fail loudly if the opt-out is broken
+        if: steps.verify.outputs.broken == 'true'
+        run: |
+          echo "::error::The latest upstream T3 Code release does not honor the opt-out. See COMPATIBILITY.md."
+          exit 1
