@@ -1,0 +1,172 @@
+{
+  "latest": {
+    "stable": {
+      "tag": "v0.1.11",
+      "channel": "stable",
+      "checked_at": "2026-11-24T20:03:54+00:00",
+      "status": "verified",
+      "optout_blocks_upload": true,
+      "default_uploads": true,
+      "do_not_track_honored": false,
+      "policy_accepted": true,
+      "boot_events": [
+        "install.owner_observed",
+        "server.boot.heartbeat"
+      ],
+      "critical": [],
+      "warnings": [],
+      "notes": [],
+      "attempts": 1
+    },
+    "nightly": {
+      "tag": "v0.1.12-nightly.20261124.5204",
+      "channel": "nightly",
+      "checked_at": "2026-11-24T20:05:43+00:00",
+      "status": "verified",
+      "optout_blocks_upload": true,
+      "default_uploads": true,
+      "do_not_track_honored": false,
+      "policy_accepted": true,
+      "boot_events": [
+        "install.owner_observed",
+        "server.boot.heartbeat"
+      ],
+      "critical": [],
+      "warnings": [],
+      "notes": [],
+      "attempts": 1
+    }
+  },
+  "history": [
+    {
+      "tag": "v0.1.12-nightly.20261124.5204",
+      "channel": "nightly",
+      "checked_at": "2026-11-24T20:05:43+00:00",
+      "status": "verified",
+      "optout_blocks_upload": true,
+      "default_uploads": true,
+      "do_not_track_honored": false,
+      "policy_accepted": true,
+      "boot_events": [
+        "install.owner_observed",
+        "server.boot.heartbeat"
+      ],
+      "critical": [],
+      "warnings": [],
+      "notes": [],
+      "attempts": 1
+    },
+    {
+      "tag": "v0.1.11",
+      "channel": "stable",
+      "checked_at": "2026-11-24T20:03:54+00:00",
+      "status": "verified",
+      "optout_blocks_upload": true,
+      "default_uploads": true,
+      "do_not_track_honored": false,
+      "policy_accepted": true,
+      "boot_events": [
+        "install.owner_observed",
+        "server.boot.heartbeat"
+      ],
+      "critical": [],
+      "warnings": [],
+      "notes": [],
+      "attempts": 1
+    }
+  ],
+  "details": {
+    "v0.1.11": {
+      "source": {
+        "server_reads_optout": [
+          "apps/server/src/telemetry/AnalyticsService.ts"
+        ],
+        "relay_tracing_reads_optout": [
+          "packages/shared/src/otelEnvironment.ts"
+        ],
+        "desktop_forwards_optout_from_login_shell": [
+          "apps/desktop/src/backend/DesktopBackendConfiguration.ts",
+          "apps/desktop/src/shell/DesktopShellEnvironment.ts"
+        ],
+        "service_env_supported": true,
+        "telemetry_hosts": [
+          "ingest.t3.codes"
+        ],
+        "events": [
+          "client.thread.started",
+          "client.turn.requested",
+          "feature.used",
+          "mcp.delegated_task.finished",
+          "mcp.tool.invoked",
+          "provider.request.completed",
+          "provider.turn.completed",
+          "server.boot.heartbeat"
+        ],
+        "identity_sources": [
+          "../auth/ServerSecretStore.ts",
+          "../cloud/config.ts",
+          "../config.ts",
+          ".claude.json",
+          ".codex",
+          "auth.json"
+        ],
+        "honors_do_not_track": false,
+        "custom_model_names_filtered": true,
+        "policy_schema_v1": true,
+        "policy_has_telemetry_and_connect": true,
+        "docs_document_optout": true
+      },
+      "binary_endpoints": [
+        "ingest.t3.codes",
+        "us-east-1.aws.edge.axiom.co"
+      ]
+    },
+    "v0.1.12-nightly.20261124.5204": {
+      "source": {
+        "server_reads_optout": [
+          "apps/server/src/telemetry/AnalyticsService.ts"
+        ],
+        "relay_tracing_reads_optout": [
+          "packages/shared/src/otelEnvironment.ts"
+        ],
+        "desktop_forwards_optout_from_login_shell": [
+          "apps/desktop/src/backend/DesktopBackendConfiguration.ts",
+          "apps/desktop/src/shell/DesktopShellEnvironment.ts"
+        ],
+        "service_env_supported": true,
+        "telemetry_hosts": [
+          "ingest.t3.codes"
+        ],
+        "events": [
+          "agent.feedback",
+          "client.thread.started",
+          "client.turn.requested",
+          "feature.used",
+          "mcp.delegated_task.finished",
+          "mcp.tool.invoked",
+          "provider.request.completed",
+          "provider.turn.completed",
+          "server.boot.heartbeat"
+        ],
+        "identity_sources": [
+          "../auth/ServerSecretStore.ts",
+          "../cloud/config.ts",
+          "../config.ts",
+          ".claude.json",
+          ".codex",
+          "auth.json"
+        ],
+        "honors_do_not_track": false,
+        "custom_model_names_filtered": false,
+        "policy_schema_v1": true,
+        "policy_has_telemetry_and_connect": true,
+        "docs_document_optout": true
+      },
+      "binary_endpoints": [
+        "ingest.t3.codes",
+        "us-east-1.aws.edge.axiom.co"
+      ]
+    }
+  },
+  "updated_at": "2026-11-24T20:07:32+00:00"
+}

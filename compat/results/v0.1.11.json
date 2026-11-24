@@ -1,0 +1,332 @@
+{
+  "tag": "v0.1.11",
+  "channel": "stable",
+  "checked_at": "2026-11-24T20:03:54+00:00",
+  "platform": "linux-x64",
+  "asset": "t3-0.1.11-linux-x64.tar.gz",
+  "sha256": "2b691c07f5bcb5adea4a863d5324aae7db21bd6d82280cec7787836dcaa013e1",
+  "binary_endpoints": [
+    "ingest.t3.codes",
+    "us-east-1.aws.edge.axiom.co"
+  ],
+  "probe": {
+    "t3": "/tmp/t-off-watchdog-6cz1fvj6/v0.1.11/x/t3-0.1.11-linux-x64/t3",
+    "fake_identities": {
+      "codex_account_id": "acct-FAKE-chatgpt-workspace-0001",
+      "openai_user_id": "user-FAKE-openai-0001",
+      "claude_user_id": "fake-claude-machine-userid-0001",
+      "claude_account_uuid": "00000000-0000-4000-8000-fakeclaude001"
+    },
+    "scenarios": {
+      "default": {
+        "env": {},
+        "status": "ok",
+        "ready_seconds": 1.5,
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/batch/"
+          }
+        ],
+        "events": [
+          {
+            "uuid": "01a20f28-8316-756c-9310-766b1dfdcd52",
+            "event": "server.boot.heartbeat",
+            "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
+            "properties": {
+              "threadCount": 0,
+              "projectCount": 0,
+              "installId": "46f2df0790918ec987421d0c9535aa4f7604afc8ab139401879745a7a8424a60",
+              "$process_person_profile": false,
+              "platform": "linux",
+              "arch": "x64",
+              "t3CodeVersion": "0.1.11",
+              "telemetryChannel": "stable",
+              "clientType": "cli-web-client",
+              "serverOs": "Linux",
+              "serverArch": "x64",
+              "serverAppVersion": "0.1.11",
+              "serverMode": "web"
+            },
+            "timestamp": "2026-11-24T20:04:02.966Z"
+          },
+          {
+            "uuid": "01a20f28-8320-757b-a60c-ebcb08d0c1f5",
+            "event": "install.owner_observed",
+            "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
+            "properties": {
+              "ownerSource": "openai",
+              "ownerId": "13561ea88038893c57652b23be808b8c638c27acd2f31bd3e380919c2d9d153d",
+              "observedBy": "server",
+              "installId": "46f2df0790918ec987421d0c9535aa4f7604afc8ab139401879745a7a8424a60",
+              "$process_person_profile": false,
+              "platform": "linux",
+              "arch": "x64",
+              "t3CodeVersion": "0.1.11",
+              "telemetryChannel": "stable",
+              "clientType": "cli-web-client",
+              "serverOs": "Linux",
+              "serverArch": "x64",
+              "serverAppVersion": "0.1.11",
+              "serverMode": "web"
+            },
+            "timestamp": "2026-11-24T20:04:02.976Z"
+          },
+          {
+            "uuid": "01a20f28-8321-728b-930e-e631c04be17b",
+            "event": "install.owner_observed",
+            "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
+            "properties": {
+              "ownerSource": "claude",
+              "ownerId": "36fea012bc40fa8f82b83458c5450f4ebcd6b187af920dbbd291e9b24554be9e",
+              "observedBy": "server",
+              "installId": "46f2df0790918ec987421d0c9535aa4f7604afc8ab139401879745a7a8424a60",
+              "$process_person_profile": false,
+              "platform": "linux",
+              "arch": "x64",
+              "t3CodeVersion": "0.1.11",
+              "telemetryChannel": "stable",
+              "clientType": "cli-web-client",
+              "serverOs": "Linux",
+              "serverArch": "x64",
+              "serverAppVersion": "0.1.11",
+              "serverMode": "web"
+            },
+            "timestamp": "2026-11-24T20:04:02.977Z"
+          }
+        ],
+        "spans": {
+          "AnalyticsService.record": 3,
+          "AnalyticsService.sendBatch": 1
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [
+            "install.owner_observed",
+            "server.boot.heartbeat"
+          ],
+          "property_keys": [
+            "$process_person_profile",
+            "arch",
+            "clientType",
+            "installId",
+            "observedBy",
+            "ownerId",
+            "ownerSource",
+            "platform",
+            "projectCount",
+            "serverAppVersion",
+            "serverArch",
+            "serverMode",
+            "serverOs",
+            "t3CodeVersion",
+            "telemetryChannel",
+            "threadCount"
+          ],
+          "distinct_id_is_sha256_of": [
+            "codex_account_id"
+          ],
+          "owner_ids_are_sha256_of": {
+            "openai": "openai_user_id",
+            "claude": "claude_account_uuid"
+          },
+          "raw_identifier_in_payload": false
+        }
+      },
+      "optout": {
+        "env": {
+          "T3CODE_TELEMETRY_ENABLED": "false"
+        },
+        "status": "ok",
+        "ready_seconds": 1.5,
+        "requests": [],
+        "events": [],
+        "spans": {
+          "AnalyticsService.record": 3,
+          "AnalyticsService.sendBatch": 0
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [],
+          "property_keys": [],
+          "distinct_id_is_sha256_of": [],
+          "owner_ids_are_sha256_of": {},
+          "raw_identifier_in_payload": false
+        }
+      },
+      "do-not-track": {
+        "env": {
+          "DO_NOT_TRACK": "1"
+        },
+        "status": "ok",
+        "ready_seconds": 1.5,
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/batch/"
+          }
+        ],
+        "events": [
+          {
+            "uuid": "01a20f29-3d9d-7525-8598-6b61aaabc467",
+            "event": "server.boot.heartbeat",
+            "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
+            "properties": {
+              "threadCount": 0,
+              "projectCount": 0,
+              "installId": "5256a3f56209f8d718fb7b8b3e759fe877e801d9460ab327909243b29c2eebb3",
+              "$process_person_profile": false,
+              "platform": "linux",
+              "arch": "x64",
+              "t3CodeVersion": "0.1.11",
+              "telemetryChannel": "stable",
+              "clientType": "cli-web-client",
+              "serverOs": "Linux",
+              "serverArch": "x64",
+              "serverAppVersion": "0.1.11",
+              "serverMode": "web"
+            },
+            "timestamp": "2026-11-24T20:04:50.717Z"
+          },
+          {
+            "uuid": "01a20f29-3da4-75aa-ac0e-57a64fe2b35a",
+            "event": "install.owner_observed",
+            "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
+            "properties": {
+              "ownerSource": "openai",
+              "ownerId": "13561ea88038893c57652b23be808b8c638c27acd2f31bd3e380919c2d9d153d",
+              "observedBy": "server",
+              "installId": "5256a3f56209f8d718fb7b8b3e759fe877e801d9460ab327909243b29c2eebb3",
+              "$process_person_profile": false,
+              "platform": "linux",
+              "arch": "x64",
+              "t3CodeVersion": "0.1.11",
+              "telemetryChannel": "stable",
+              "clientType": "cli-web-client",
+              "serverOs": "Linux",
+              "serverArch": "x64",
+              "serverAppVersion": "0.1.11",
+              "serverMode": "web"
+            },
+            "timestamp": "2026-11-24T20:04:50.724Z"
+          },
+          {
+            "uuid": "01a20f29-3da4-75aa-ac0e-57a7e7b3f663",
+            "event": "install.owner_observed",
+            "distinct_id": "8555534827fefd6ae9bff01fa7139d99998185df1ad6da62357782d18bda9cb6",
+            "properties": {
+              "ownerSource": "claude",
+              "ownerId": "36fea012bc40fa8f82b83458c5450f4ebcd6b187af920dbbd291e9b24554be9e",
+              "observedBy": "server",
+              "installId": "5256a3f56209f8d718fb7b8b3e759fe877e801d9460ab327909243b29c2eebb3",
+              "$process_person_profile": false,
+              "platform": "linux",
+              "arch": "x64",
+              "t3CodeVersion": "0.1.11",
+              "telemetryChannel": "stable",
+              "clientType": "cli-web-client",
+              "serverOs": "Linux",
+              "serverArch": "x64",
+              "serverAppVersion": "0.1.11",
+              "serverMode": "web"
+            },
+            "timestamp": "2026-11-24T20:04:50.724Z"
+          }
+        ],
+        "spans": {
+          "AnalyticsService.record": 3,
+          "AnalyticsService.sendBatch": 1
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [
+            "install.owner_observed",
+            "server.boot.heartbeat"
+          ],
+          "property_keys": [
+            "$process_person_profile",
+            "arch",
+            "clientType",
+            "installId",
+            "observedBy",
+            "ownerId",
+            "ownerSource",
+            "platform",
+            "projectCount",
+            "serverAppVersion",
+            "serverArch",
+            "serverMode",
+            "serverOs",
+            "t3CodeVersion",
+            "telemetryChannel",
+            "threadCount"
+          ],
+          "distinct_id_is_sha256_of": [
+            "codex_account_id"
+          ],
+          "owner_ids_are_sha256_of": {
+            "openai": "openai_user_id",
+            "claude": "claude_account_uuid"
+          },
+          "raw_identifier_in_payload": false
+        }
+      }
+    },
+    "verdict": {
+      "default_uploads": true,
+      "optout_blocks_upload": true,
+      "do_not_track_honored": false,
+      "otel_sdk_disabled_blocks_upload": null
+    },
+    "exit_code": 0
+  },
+  "policy": {
+    "server_started": true,
+    "uploads": 0,
+    "status": "ok",
+    "server_log_tail": ""
+  },
+  "source": {
+    "server_reads_optout": [
+      "apps/server/src/telemetry/AnalyticsService.ts"
+    ],
+    "relay_tracing_reads_optout": [
+      "packages/shared/src/otelEnvironment.ts"
+    ],
+    "desktop_forwards_optout_from_login_shell": [
+      "apps/desktop/src/backend/DesktopBackendConfiguration.ts",
+      "apps/desktop/src/shell/DesktopShellEnvironment.ts"
+    ],
+    "service_env_supported": true,
+    "telemetry_hosts": [
+      "ingest.t3.codes"
+    ],
+    "events": [
+      "client.thread.started",
+      "client.turn.requested",
+      "feature.used",
+      "mcp.delegated_task.finished",
+      "mcp.tool.invoked",
+      "provider.request.completed",
+      "provider.turn.completed",
+      "server.boot.heartbeat"
+    ],
+    "identity_sources": [
+      "../auth/ServerSecretStore.ts",
+      "../cloud/config.ts",
+      "../config.ts",
+      ".claude.json",
+      ".codex",
+      "auth.json"
+    ],
+    "honors_do_not_track": false,
+    "custom_model_names_filtered": true,
+    "policy_schema_v1": true,
+    "policy_has_telemetry_and_connect": true,
+    "docs_document_optout": true
+  },
+  "status": "verified",
+  "critical": [],
+  "warnings": [],
+  "notes": []
+}
