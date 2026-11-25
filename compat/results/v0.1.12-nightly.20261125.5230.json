@@ -1,0 +1,181 @@
+{
+  "tag": "v0.1.12-nightly.20261125.5230",
+  "channel": "nightly",
+  "checked_at": "2026-11-25T08:52:41+00:00",
+  "platform": "linux-x64",
+  "asset": "t3-0.1.12-nightly.20261125.5230-linux-x64.tar.gz",
+  "sha256": "a6795b4f70039126dd75f331d257cab061dee9a8097623b18a309d1d3257ff27",
+  "binary_endpoints": [
+    "ingest.t3.codes",
+    "us-east-1.aws.edge.axiom.co"
+  ],
+  "probe": {
+    "t3": "/tmp/t-off-watchdog-7yjvgqtx/v0.1.12-nightly.20261125.5230/x/t3-0.1.12-nightly.20261125.5230-linux-x64/t3",
+    "fake_identities": {
+      "codex_account_id": "acct-FAKE-chatgpt-workspace-0001",
+      "openai_user_id": "user-FAKE-openai-0001",
+      "claude_user_id": "fake-claude-machine-userid-0001",
+      "claude_account_uuid": "00000000-0000-4000-8000-fakeclaude001"
+    },
+    "scenarios": {
+      "default": {
+        "env": {},
+        "status": "ok",
+        "ready_seconds": 1.0,
+        "requests": [
+          {
+            "method": "POST",
+            "path": "/batch/"
+          }
+        ],
+        "events": [
+          {
+            "uuid": "01a211e8-4e88-70f3-bb24-5184c9075848",
+            "event": "server.boot.heartbeat",
+            "distinct_id": "e6a1925143859eed55e0863a1c611f7841c0775dac3c31d3bf7494cf4113edec",
+            "properties": {
+              "threadCount": 0,
+              "projectCount": 0,
+              "installId": "e6a1925143859eed55e0863a1c611f7841c0775dac3c31d3bf7494cf4113edec",
+              "$process_person_profile": false,
+              "platform": "linux",
+              "arch": "x64",
+              "t3CodeVersion": "0.1.12-nightly.20261125.5230",
+              "telemetryChannel": "nightly",
+              "clientType": "cli-web-client",
+              "serverOs": "Linux",
+              "serverArch": "x64",
+              "serverAppVersion": "0.1.12-nightly.20261125.5230",
+              "serverMode": "web"
+            },
+            "timestamp": "2026-11-25T08:52:46.856Z"
+          }
+        ],
+        "spans": {
+          "AnalyticsService.record": 1,
+          "AnalyticsService.sendBatch": 1
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [
+            "server.boot.heartbeat"
+          ],
+          "property_keys": [
+            "$process_person_profile",
+            "arch",
+            "clientType",
+            "installId",
+            "platform",
+            "projectCount",
+            "serverAppVersion",
+            "serverArch",
+            "serverMode",
+            "serverOs",
+            "t3CodeVersion",
+            "telemetryChannel",
+            "threadCount"
+          ],
+          "distinct_id_is_sha256_of": [
+            "other"
+          ],
+          "owner_ids_are_sha256_of": {},
+          "raw_identifier_in_payload": false
+        }
+      },
+      "optout": {
+        "env": {
+          "T3CODE_TELEMETRY_ENABLED": "false"
+        },
+        "status": "ok",
+        "ready_seconds": 1.0,
+        "requests": [],
+        "events": [],
+        "spans": {
+          "AnalyticsService.record": 1,
+          "AnalyticsService.sendBatch": 0
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [],
+          "property_keys": [],
+          "distinct_id_is_sha256_of": [],
+          "owner_ids_are_sha256_of": {},
+          "raw_identifier_in_payload": false
+        }
+      },
+      "do-not-track": {
+        "env": {
+          "DO_NOT_TRACK": "1"
+        },
+        "status": "ok",
+        "ready_seconds": 1.0,
+        "requests": [],
+        "events": [],
+        "spans": {
+          "AnalyticsService.record": 1,
+          "AnalyticsService.sendBatch": 0
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [],
+          "property_keys": [],
+          "distinct_id_is_sha256_of": [],
+          "owner_ids_are_sha256_of": {},
+          "raw_identifier_in_payload": false
+        }
+      }
+    },
+    "verdict": {
+      "default_uploads": true,
+      "optout_blocks_upload": true,
+      "do_not_track_honored": true,
+      "otel_sdk_disabled_blocks_upload": null
+    },
+    "exit_code": 0
+  },
+  "policy": {
+    "server_started": true,
+    "uploads": 0,
+    "status": "ok",
+    "server_log_tail": ""
+  },
+  "source": {
+    "server_reads_optout": [
+      "apps/server/src/telemetry/AnalyticsService.ts"
+    ],
+    "relay_tracing_reads_optout": [
+      "packages/shared/src/otelEnvironment.ts"
+    ],
+    "desktop_forwards_optout_from_login_shell": [
+      "apps/desktop/src/backend/DesktopBackendConfiguration.ts",
+      "apps/desktop/src/shell/DesktopShellEnvironment.ts"
+    ],
+    "service_env_supported": true,
+    "telemetry_hosts": [
+      "ingest.t3.codes"
+    ],
+    "events": [
+      "agent.feedback",
+      "client.thread.started",
+      "client.turn.requested",
+      "feature.used",
+      "mcp.delegated_task.finished",
+      "mcp.tool.invoked",
+      "provider.request.completed",
+      "provider.turn.completed",
+      "server.boot.heartbeat"
+    ],
+    "identity_sources": [],
+    "honors_do_not_track": true,
+    "custom_model_names_filtered": true,
+    "policy_schema_v1": true,
+    "policy_has_telemetry_and_connect": true,
+    "docs_document_optout": true
+  },
+  "status": "verified",
+  "critical": [],
+  "warnings": [],
+  "notes": [
+    "T3 Code's own code now mentions DO_NOT_TRACK"
+  ]
+}

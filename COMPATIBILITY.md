@@ -6,23 +6,30 @@ Codex/Claude logins and a local analytics sink (see [lab/probe.py](lab/probe.py)
 
 | Release | Channel | Checked (UTC) | Result | Opt-out stops uploads | Tailnet policy works | DO_NOT_TRACK honored |
 |---|---|---|---|---|---|---|
+| [v0.1.12-nightly.20261125.5230](https://github.com/pingdotgg/t3code/releases/tag/v0.1.12-nightly.20261125.5230) | nightly | 2026-11-25 08:52 | verified | yes | yes | yes |
+| [v0.1.12](https://github.com/pingdotgg/t3code/releases/tag/v0.1.12) | stable | 2026-11-25 08:50 | verified | yes | yes | yes |
 | [v0.1.12-nightly.20261124.5204](https://github.com/pingdotgg/t3code/releases/tag/v0.1.12-nightly.20261124.5204) | nightly | 2026-11-24 20:10 | verified | yes | yes | **NO** |
 | [v0.1.11](https://github.com/pingdotgg/t3code/releases/tag/v0.1.11) | stable | 2026-11-24 20:08 | verified | yes | yes | **NO** |
 
-## Latest stable: v0.1.11
+## Latest stable: v0.1.12
 
-- Analytics endpoints compiled into the release: `ingest.t3.codes`, `us-east-1.aws.edge.axiom.co`
-- Analytics hosts in the telemetry source: `ingest.t3.codes`
-- Analytics events in the source (8): `client.thread.started`, `client.turn.requested`, `feature.used`, `mcp.delegated_task.finished`, `mcp.tool.invoked`, `provider.request.completed`, `provider.turn.completed`, `server.boot.heartbeat`
-- Files the telemetry identity code reads: `.claude.json`, `.codex`, `auth.json`
-- Custom model names kept out of analytics: yes
-- Upstream docs describe `T3CODE_TELEMETRY_ENABLED=false`: yes
-
-## Latest nightly: v0.1.12-nightly.20261124.5204
+- Note: new analytics events: agent.feedback
+- Note: T3 Code's own code now mentions DO_NOT_TRACK
 
 - Analytics endpoints compiled into the release: `ingest.t3.codes`, `us-east-1.aws.edge.axiom.co`
 - Analytics hosts in the telemetry source: `ingest.t3.codes`
 - Analytics events in the source (9): `agent.feedback`, `client.thread.started`, `client.turn.requested`, `feature.used`, `mcp.delegated_task.finished`, `mcp.tool.invoked`, `provider.request.completed`, `provider.turn.completed`, `server.boot.heartbeat`
-- Files the telemetry identity code reads: `.claude.json`, `.codex`, `auth.json`
-- Custom model names kept out of analytics: **NO**
+- Files the telemetry identity code reads: none found
+- Custom model names kept out of analytics: yes
+- Upstream docs describe `T3CODE_TELEMETRY_ENABLED=false`: yes
+
+## Latest nightly: v0.1.12-nightly.20261125.5230
+
+- Note: T3 Code's own code now mentions DO_NOT_TRACK
+
+- Analytics endpoints compiled into the release: `ingest.t3.codes`, `us-east-1.aws.edge.axiom.co`
+- Analytics hosts in the telemetry source: `ingest.t3.codes`
+- Analytics events in the source (9): `agent.feedback`, `client.thread.started`, `client.turn.requested`, `feature.used`, `mcp.delegated_task.finished`, `mcp.tool.invoked`, `provider.request.completed`, `provider.turn.completed`, `server.boot.heartbeat`
+- Files the telemetry identity code reads: none found
+- Custom model names kept out of analytics: yes
 - Upstream docs describe `T3CODE_TELEMETRY_ENABLED=false`: yes
