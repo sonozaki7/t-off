@@ -6,15 +6,17 @@ Codex/Claude logins and a local analytics sink (see [lab/probe.py](lab/probe.py)
 
 | Release | Channel | Checked (UTC) | Result | Opt-out stops uploads | Tailnet policy works | DO_NOT_TRACK honored |
 |---|---|---|---|---|---|---|
+| [v0.1.13-nightly.20261126.5305](https://github.com/pingdotgg/t3code/releases/tag/v0.1.13-nightly.20261126.5305) | nightly | 2026-11-26 21:45 | inconclusive | yes | yes | yes |
+| [v0.1.13](https://github.com/pingdotgg/t3code/releases/tag/v0.1.13) | stable | 2026-11-26 21:42 | inconclusive | yes | yes | yes |
 | [v0.1.13-nightly.20261125.5258](https://github.com/pingdotgg/t3code/releases/tag/v0.1.13-nightly.20261125.5258) | nightly | 2026-11-25 21:50 | verified | yes | yes | yes |
 | [v0.1.12-nightly.20261125.5230](https://github.com/pingdotgg/t3code/releases/tag/v0.1.12-nightly.20261125.5230) | nightly | 2026-11-25 08:52 | verified | yes | yes | yes |
 | [v0.1.12](https://github.com/pingdotgg/t3code/releases/tag/v0.1.12) | stable | 2026-11-25 08:50 | verified | yes | yes | yes |
 | [v0.1.12-nightly.20261124.5204](https://github.com/pingdotgg/t3code/releases/tag/v0.1.12-nightly.20261124.5204) | nightly | 2026-11-24 20:10 | verified | yes | yes | **NO** |
 | [v0.1.11](https://github.com/pingdotgg/t3code/releases/tag/v0.1.11) | stable | 2026-11-24 20:08 | verified | yes | yes | **NO** |
 
-## Latest stable: v0.1.12
+## Latest stable: v0.1.13
 
-- Note: new analytics events: agent.feedback
+- Warning: inconclusive: the default run did not upload or a server did not start; the test may need updating
 - Note: T3 Code's own code now mentions DO_NOT_TRACK
 
 - Analytics endpoints compiled into the release: `ingest.t3.codes`, `us-east-1.aws.edge.axiom.co`
@@ -24,8 +26,9 @@ Codex/Claude logins and a local analytics sink (see [lab/probe.py](lab/probe.py)
 - Custom model names kept out of analytics: yes
 - Upstream docs describe `T3CODE_TELEMETRY_ENABLED=false`: yes
 
-## Latest nightly: v0.1.13-nightly.20261125.5258
+## Latest nightly: v0.1.13-nightly.20261126.5305
 
+- Warning: inconclusive: the default run did not upload or a server did not start; the test may need updating
 - Note: T3 Code's own code now mentions DO_NOT_TRACK
 
 - Analytics endpoints compiled into the release: `ingest.t3.codes`, `us-east-1.aws.edge.axiom.co`

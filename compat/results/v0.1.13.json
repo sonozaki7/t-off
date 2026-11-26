@@ -1,0 +1,138 @@
+{
+  "tag": "v0.1.13",
+  "channel": "stable",
+  "checked_at": "2026-11-26T21:42:56+00:00",
+  "platform": "linux-x64",
+  "asset": "t3-0.1.13-linux-x64.tar.gz",
+  "sha256": "64e0f8446d3f618b157d4e5a0a6808ab3c8bf1a1b3e44eab3100e554be05e5d7",
+  "binary_endpoints": [
+    "ingest.t3.codes",
+    "us-east-1.aws.edge.axiom.co"
+  ],
+  "probe": {
+    "t3": "/tmp/t-off-watchdog-qbyvbp54/v0.1.13/x/t3-0.1.13-linux-x64/t3",
+    "fake_identities": {
+      "codex_account_id": "acct-FAKE-chatgpt-workspace-0001",
+      "openai_user_id": "user-FAKE-openai-0001",
+      "claude_user_id": "fake-claude-machine-userid-0001",
+      "claude_account_uuid": "00000000-0000-4000-8000-fakeclaude001"
+    },
+    "scenarios": {
+      "default": {
+        "env": {},
+        "status": "ok",
+        "ready_seconds": 1.5,
+        "requests": [],
+        "events": [],
+        "spans": {
+          "AnalyticsService.record": 1,
+          "AnalyticsService.sendBatch": 1
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [],
+          "property_keys": [],
+          "distinct_id_is_sha256_of": [],
+          "owner_ids_are_sha256_of": {},
+          "raw_identifier_in_payload": false
+        }
+      },
+      "optout": {
+        "env": {
+          "T3CODE_TELEMETRY_ENABLED": "false"
+        },
+        "status": "ok",
+        "ready_seconds": 1.5,
+        "requests": [],
+        "events": [],
+        "spans": {
+          "AnalyticsService.record": 1,
+          "AnalyticsService.sendBatch": 0
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [],
+          "property_keys": [],
+          "distinct_id_is_sha256_of": [],
+          "owner_ids_are_sha256_of": {},
+          "raw_identifier_in_payload": false
+        }
+      },
+      "do-not-track": {
+        "env": {
+          "DO_NOT_TRACK": "1"
+        },
+        "status": "ok",
+        "ready_seconds": 1.5,
+        "requests": [],
+        "events": [],
+        "spans": {
+          "AnalyticsService.record": 1,
+          "AnalyticsService.sendBatch": 0
+        },
+        "server_log_tail": "",
+        "analysis": {
+          "event_names": [],
+          "property_keys": [],
+          "distinct_id_is_sha256_of": [],
+          "owner_ids_are_sha256_of": {},
+          "raw_identifier_in_payload": false
+        }
+      }
+    },
+    "verdict": {
+      "default_uploads": false,
+      "optout_blocks_upload": true,
+      "do_not_track_honored": true,
+      "otel_sdk_disabled_blocks_upload": null
+    },
+    "exit_code": 11
+  },
+  "policy": {
+    "server_started": true,
+    "uploads": 0,
+    "status": "ok",
+    "server_log_tail": ""
+  },
+  "source": {
+    "server_reads_optout": [
+      "apps/server/src/telemetry/AnalyticsService.ts"
+    ],
+    "relay_tracing_reads_optout": [
+      "packages/shared/src/otelEnvironment.ts"
+    ],
+    "desktop_forwards_optout_from_login_shell": [
+      "apps/desktop/src/backend/DesktopBackendConfiguration.ts",
+      "apps/desktop/src/shell/DesktopShellEnvironment.ts"
+    ],
+    "service_env_supported": true,
+    "telemetry_hosts": [
+      "ingest.t3.codes"
+    ],
+    "events": [
+      "agent.feedback",
+      "client.thread.started",
+      "client.turn.requested",
+      "feature.used",
+      "mcp.delegated_task.finished",
+      "mcp.tool.invoked",
+      "provider.request.completed",
+      "provider.turn.completed",
+      "server.boot.heartbeat"
+    ],
+    "identity_sources": [],
+    "honors_do_not_track": true,
+    "custom_model_names_filtered": true,
+    "policy_schema_v1": true,
+    "policy_has_telemetry_and_connect": true,
+    "docs_document_optout": true
+  },
+  "status": "inconclusive",
+  "critical": [],
+  "warnings": [
+    "inconclusive: the default run did not upload or a server did not start; the test may need updating"
+  ],
+  "notes": [
+    "T3 Code's own code now mentions DO_NOT_TRACK"
+  ]
+}

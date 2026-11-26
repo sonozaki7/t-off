@@ -1,39 +1,38 @@
 {
   "latest": {
     "stable": {
-      "tag": "v0.1.12",
+      "tag": "v0.1.13",
       "channel": "stable",
-      "checked_at": "2026-11-25T08:50:40+00:00",
-      "status": "verified",
+      "checked_at": "2026-11-26T21:42:56+00:00",
+      "status": "inconclusive",
       "optout_blocks_upload": true,
-      "default_uploads": true,
+      "default_uploads": false,
       "do_not_track_honored": true,
       "policy_accepted": true,
-      "boot_events": [
-        "server.boot.heartbeat"
-      ],
+      "boot_events": [],
       "critical": [],
-      "warnings": [],
+      "warnings": [
+        "inconclusive: the default run did not upload or a server did not start; the test may need updating"
+      ],
       "notes": [
-        "new analytics events: agent.feedback",
         "T3 Code's own code now mentions DO_NOT_TRACK"
       ],
       "attempts": 1
     },
     "nightly": {
-      "tag": "v0.1.13-nightly.20261125.5258",
+      "tag": "v0.1.13-nightly.20261126.5305",
       "channel": "nightly",
-      "checked_at": "2026-11-25T21:50:16+00:00",
-      "status": "verified",
+      "checked_at": "2026-11-26T21:45:14+00:00",
+      "status": "inconclusive",
       "optout_blocks_upload": true,
-      "default_uploads": true,
+      "default_uploads": false,
       "do_not_track_honored": true,
       "policy_accepted": true,
-      "boot_events": [
-        "server.boot.heartbeat"
-      ],
+      "boot_events": [],
       "critical": [],
-      "warnings": [],
+      "warnings": [
+        "inconclusive: the default run did not upload or a server did not start; the test may need updating"
+      ],
       "notes": [
         "T3 Code's own code now mentions DO_NOT_TRACK"
       ],
@@ -41,6 +40,44 @@
     }
   },
   "history": [
+    {
+      "tag": "v0.1.13-nightly.20261126.5305",
+      "channel": "nightly",
+      "checked_at": "2026-11-26T21:45:14+00:00",
+      "status": "inconclusive",
+      "optout_blocks_upload": true,
+      "default_uploads": false,
+      "do_not_track_honored": true,
+      "policy_accepted": true,
+      "boot_events": [],
+      "critical": [],
+      "warnings": [
+        "inconclusive: the default run did not upload or a server did not start; the test may need updating"
+      ],
+      "notes": [
+        "T3 Code's own code now mentions DO_NOT_TRACK"
+      ],
+      "attempts": 1
+    },
+    {
+      "tag": "v0.1.13",
+      "channel": "stable",
+      "checked_at": "2026-11-26T21:42:56+00:00",
+      "status": "inconclusive",
+      "optout_blocks_upload": true,
+      "default_uploads": false,
+      "do_not_track_honored": true,
+      "policy_accepted": true,
+      "boot_events": [],
+      "critical": [],
+      "warnings": [
+        "inconclusive: the default run did not upload or a server did not start; the test may need updating"
+      ],
+      "notes": [
+        "T3 Code's own code now mentions DO_NOT_TRACK"
+      ],
+      "attempts": 1
+    },
     {
       "tag": "v0.1.13-nightly.20261125.5258",
       "channel": "nightly",
@@ -338,7 +375,85 @@
         "ingest.t3.codes",
         "us-east-1.aws.edge.axiom.co"
       ]
+    },
+    "v0.1.13": {
+      "source": {
+        "server_reads_optout": [
+          "apps/server/src/telemetry/AnalyticsService.ts"
+        ],
+        "relay_tracing_reads_optout": [
+          "packages/shared/src/otelEnvironment.ts"
+        ],
+        "desktop_forwards_optout_from_login_shell": [
+          "apps/desktop/src/backend/DesktopBackendConfiguration.ts",
+          "apps/desktop/src/shell/DesktopShellEnvironment.ts"
+        ],
+        "service_env_supported": true,
+        "telemetry_hosts": [
+          "ingest.t3.codes"
+        ],
+        "events": [
+          "agent.feedback",
+          "client.thread.started",
+          "client.turn.requested",
+          "feature.used",
+          "mcp.delegated_task.finished",
+          "mcp.tool.invoked",
+          "provider.request.completed",
+          "provider.turn.completed",
+          "server.boot.heartbeat"
+        ],
+        "identity_sources": [],
+        "honors_do_not_track": true,
+        "custom_model_names_filtered": true,
+        "policy_schema_v1": true,
+        "policy_has_telemetry_and_connect": true,
+        "docs_document_optout": true
+      },
+      "binary_endpoints": [
+        "ingest.t3.codes",
+        "us-east-1.aws.edge.axiom.co"
+      ]
+    },
+    "v0.1.13-nightly.20261126.5305": {
+      "source": {
+        "server_reads_optout": [
+          "apps/server/src/telemetry/AnalyticsService.ts"
+        ],
+        "relay_tracing_reads_optout": [
+          "packages/shared/src/otelEnvironment.ts"
+        ],
+        "desktop_forwards_optout_from_login_shell": [
+          "apps/desktop/src/backend/DesktopBackendConfiguration.ts",
+          "apps/desktop/src/shell/DesktopShellEnvironment.ts"
+        ],
+        "service_env_supported": true,
+        "telemetry_hosts": [
+          "ingest.t3.codes"
+        ],
+        "events": [
+          "agent.feedback",
+          "client.thread.started",
+          "client.turn.requested",
+          "feature.used",
+          "mcp.delegated_task.finished",
+          "mcp.tool.invoked",
+          "provider.request.completed",
+          "provider.turn.completed",
+          "server.boot.heartbeat"
+        ],
+        "identity_sources": [],
+        "honors_do_not_track": true,
+        "custom_model_names_filtered": true,
+        "policy_schema_v1": true,
+        "policy_has_telemetry_and_connect": true,
+        "docs_document_optout": true
+      },
+      "binary_endpoints": [
+        "ingest.t3.codes",
+        "us-east-1.aws.edge.axiom.co"
+      ]
     }
   },
-  "updated_at": "2026-11-26T08:36:12+00:00"
+  "updated_at": "2026-11-26T21:47:33+00:00"
 }
