@@ -1,7 +1,7 @@
 {
   "tag": "v0.1.13",
   "channel": "stable",
-  "checked_at": "2026-11-26T21:42:56+00:00",
+  "checked_at": "2026-11-27T08:47:55+00:00",
   "platform": "linux-x64",
   "asset": "t3-0.1.13-linux-x64.tar.gz",
   "sha256": "64e0f8446d3f618b157d4e5a0a6808ab3c8bf1a1b3e44eab3100e554be05e5d7",
@@ -10,7 +10,7 @@
     "us-east-1.aws.edge.axiom.co"
   ],
   "probe": {
-    "t3": "/tmp/t-off-watchdog-qbyvbp54/v0.1.13/x/t3-0.1.13-linux-x64/t3",
+    "t3": "/tmp/t-off-watchdog-188opfn0/v0.1.13/x/t3-0.1.13-linux-x64/t3",
     "fake_identities": {
       "codex_account_id": "acct-FAKE-chatgpt-workspace-0001",
       "openai_user_id": "user-FAKE-openai-0001",
