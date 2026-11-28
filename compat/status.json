@@ -20,9 +20,9 @@
       "attempts": 3
     },
     "nightly": {
-      "tag": "v0.1.14-nightly.20261127.5359",
+      "tag": "v0.1.14-nightly.20261128.5372",
       "channel": "nightly",
-      "checked_at": "2026-11-27T21:29:27+00:00",
+      "checked_at": "2026-11-28T08:02:33+00:00",
       "status": "inconclusive",
       "optout_blocks_upload": true,
       "default_uploads": false,
@@ -40,6 +40,25 @@
     }
   },
   "history": [
+    {
+      "tag": "v0.1.14-nightly.20261128.5372",
+      "channel": "nightly",
+      "checked_at": "2026-11-28T08:02:33+00:00",
+      "status": "inconclusive",
+      "optout_blocks_upload": true,
+      "default_uploads": false,
+      "do_not_track_honored": true,
+      "policy_accepted": true,
+      "boot_events": [],
+      "critical": [],
+      "warnings": [
+        "inconclusive: the default run did not upload or a server did not start; the test may need updating"
+      ],
+      "notes": [
+        "T3 Code's own code now mentions DO_NOT_TRACK"
+      ],
+      "attempts": 1
+    },
     {
       "tag": "v0.1.14-nightly.20261127.5359",
       "channel": "nightly",
@@ -569,7 +588,46 @@
         "ingest.t3.codes",
         "us-east-1.aws.edge.axiom.co"
       ]
+    },
+    "v0.1.14-nightly.20261128.5372": {
+      "source": {
+        "server_reads_optout": [
+          "apps/server/src/telemetry/AnalyticsService.ts"
+        ],
+        "relay_tracing_reads_optout": [
+          "packages/shared/src/otelEnvironment.ts"
+        ],
+        "desktop_forwards_optout_from_login_shell": [
+          "apps/desktop/src/backend/DesktopBackendConfiguration.ts",
+          "apps/desktop/src/shell/DesktopShellEnvironment.ts"
+        ],
+        "service_env_supported": true,
+        "telemetry_hosts": [
+          "ingest.t3.codes"
+        ],
+        "events": [
+          "agent.feedback",
+          "client.thread.started",
+          "client.turn.requested",
+          "feature.used",
+          "mcp.delegated_task.finished",
+          "mcp.tool.invoked",
+          "provider.request.completed",
+          "provider.turn.completed",
+          "server.boot.heartbeat"
+        ],
+        "identity_sources": [],
+        "honors_do_not_track": true,
+        "custom_model_names_filtered": true,
+        "policy_schema_v1": true,
+        "policy_has_telemetry_and_connect": true,
+        "docs_document_optout": true
+      },
+      "binary_endpoints": [
+        "ingest.t3.codes",
+        "us-east-1.aws.edge.axiom.co"
+      ]
     }
   },
-  "updated_at": "2026-11-27T21:31:46+00:00"
+  "updated_at": "2026-11-28T08:04:54+00:00"
 }
